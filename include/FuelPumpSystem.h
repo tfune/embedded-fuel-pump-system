@@ -1,4 +1,5 @@
 #pragma once
+#include "InputHandler.h"
 
 enum State {
     IDLE,
@@ -7,11 +8,12 @@ enum State {
     COMPLETE
 };
 
-class GasPumpSystem {
+class FuelPumpSystem {
 public:
     void init();
     void update();
 
 private:
     State state;
+    InputHandler input = InputHandler(2, 3, 4);
 };

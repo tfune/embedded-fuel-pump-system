@@ -12,7 +12,7 @@ public:
     bool fuelPressed();
 
 private:
-    int startPin;
-    int stopPin;
-    int fuelPin;
+    const int startPin;
+    const int stopPin;
+    const int fuelPin;
 };
