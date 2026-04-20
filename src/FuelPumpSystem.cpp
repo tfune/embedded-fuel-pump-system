@@ -8,6 +8,8 @@ void FuelPumpSystem::init() {
 
     fuelAmount = 0;
     fuelRate = 0.05;
+    pricePerGallon = 4.35;
+    totalCost = 0;
     lastUpdateTime = millis();
 }
 
@@ -34,9 +36,13 @@ void FuelPumpSystem::update() {
             if(now - lastUpdateTime >= 500) {
                 lastUpdateTime = now;
                 fuelAmount += fuelRate;
+                totalCost = fuelAmount * pricePerGallon;
 
                 Serial.print("Fuel dispensed: ");
-                Serial.println(fuelAmount);
+                Serial.print(fuelAmount);
+                Serial.println(" gallons");
+                Serial.print("Total Cost: $");
+                Serial.println(totalCost);
             }
 
             if(input.stopPressed()) {

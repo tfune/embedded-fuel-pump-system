@@ -21,5 +21,7 @@ private:
     unsigned long lastUpdateTime;
     float fuelAmount;
     float fuelRate;
+    float pricePerGallon;
+    float totalCost;
     void handleStateEntry();
 };
