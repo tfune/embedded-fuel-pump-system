@@ -3,39 +3,75 @@
 
 void FuelPumpSystem::init() {
     state = IDLE;
+    prevState = IDLE;
     input.init();
+
+    fuelAmount = 0;
+    fuelRate = 0.05;
+    lastUpdateTime = millis();
 }
 
 void FuelPumpSystem::update() {
+    handleStateEntry();
+
     switch(state) {
         case IDLE:
-            // waiting for user input
             if(input.startPressed()) {
                 state = FUEL_SELECTION;
-                Serial.println("State -> FUEL_Selection");
             }
             break;
         
         case FUEL_SELECTION:
-            // user selects fuel type
             if(input.fuelPressed()) {
                 state = PUMPING;
-                Serial.println("State -> PUMPING");
             }
             break;
         
-        case PUMPING:
-            // simulate fuel flow
+        case PUMPING: {
+            unsigned long now = millis();
+
+            // Update fuel dispensed every 500 ms
+            if(now - lastUpdateTime >= 500) {
+                lastUpdateTime = now;
+                fuelAmount += fuelRate;
+
+                Serial.print("Fuel dispensed: ");
+                Serial.println(fuelAmount);
+            }
+
             if(input.stopPressed()) {
                 state = COMPLETE;
-                Serial.println("State -> COMPLETE");
             }
             break;
+        }
         
         case COMPLETE:
-            // show final receipt
             state = IDLE;
-            Serial.println("State -> IDLE");
             break;
+    }
+}
+
+void FuelPumpSystem::handleStateEntry() {
+    if(state != prevState) {
+        switch(state) {
+            case IDLE:
+                Serial.println("STATE: IDLE");
+                break;
+            
+            case FUEL_SELECTION:
+                Serial.println("STATE: FUEL_Selection");
+                break;
+
+            case PUMPING: 
+                Serial.println("STATE: PUMPING");
+                fuelAmount = 0;
+                break;
+
+            case COMPLETE:
+                Serial.println("STATE: COMPLETE");
+                break;
+        }
+
+        prevState = state;
     }
 }

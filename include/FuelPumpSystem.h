@@ -15,5 +15,11 @@ public:
 
 private:
     State state;
+    State prevState;
     InputHandler input = InputHandler(2, 3, 4);
+
+    unsigned long lastUpdateTime;
+    float fuelAmount;
+    float fuelRate;
+    void handleStateEntry();
 };
