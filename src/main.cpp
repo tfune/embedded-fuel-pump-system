@@ -1,13 +1,13 @@
 #include <Arduino.h>
-#include "GasPumpSystem.h"
+#include "FuelPumpSystem.h"
 
-GasPumpSystem gasPump;
+FuelPumpSystem fuelPump;
 
 void setup() {
     Serial.begin(9600);
-    gasPump.init();
+    fuelPump.init();
 }
 
 void loop() {
-    gasPump.update();
+    fuelPump.update();
 }

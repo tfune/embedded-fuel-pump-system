@@ -1,11 +1,11 @@
 #include <Arduino.h>
-#include "GasPumpSystem.h"
+#include "FuelPumpSystem.h"
 
-void GasPumpSystem::init() {
+void FuelPumpSystem::init() {
     state = IDLE;
 }
 
-void GasPumpSystem::update() {
+void FuelPumpSystem::update() {
     switch(state) {
         case IDLE:
             // waiting for user input
