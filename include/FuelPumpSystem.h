@@ -16,7 +16,7 @@ public:
 private:
     State state;
     State prevState;
-    InputHandler input = InputHandler(2, 3, 4);
+    InputHandler input;
 
     unsigned long lastUpdateTime;
     float fuelAmount;

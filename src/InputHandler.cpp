@@ -1,27 +1,51 @@
-#include <Arduino.h>
 #include "InputHandler.h"
 
-InputHandler::InputHandler(int start, int stop, int fuel)
-    : startPin(start), stopPin(stop), fuelPin(fuel) {}
-
 void InputHandler::init() {
-    pinMode(startPin, INPUT_PULLUP);
-    pinMode(stopPin, INPUT_PULLUP);
-    pinMode(fuelPin, INPUT_PULLUP);
+    inputBuffer = "";
+    lastKey = 0;
 }
 
 void InputHandler::update() {
-    // debounce logic (will do later)
+    // Reset events every cycle
+    startEvent = false;
+    fuelEvent = false;
+    stopEvent = false;
+
+    char key = keypad.getKey();
+    if(!key) return;
+    lastKey = key;
+
+    // Event Mapping
+    if(key == 'A') startEvent = true;
+    if(key == 'B') fuelEvent = true;
+    if(key == 'C') stopEvent = true;
+
+    // Input Buffer
+    if(key >= '0' && key <= '9') {
+        inputBuffer += key;
+    }
+
+    if(key == '*') {
+        inputBuffer = "";
+    }
 }
 
 bool InputHandler::startPressed() {
-    return digitalRead(startPin) == LOW;
-}
-
-bool InputHandler::stopPressed() {
-    return digitalRead(stopPin) == LOW;
+    return startEvent;
 }
 
 bool InputHandler::fuelPressed() {
-    return digitalRead(fuelPin) == LOW;
+    return fuelEvent;
+}
+
+bool InputHandler::stopPressed() {
+    return stopEvent;
+}
+
+String InputHandler::getInputBuffer() {
+    return inputBuffer;
+}
+
+void InputHandler::clearBuffer() {
+    inputBuffer = "";
 }

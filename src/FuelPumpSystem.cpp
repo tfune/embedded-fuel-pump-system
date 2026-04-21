@@ -4,6 +4,7 @@
 void FuelPumpSystem::init() {
     state = READY;
     prevState = READY;
+
     input.init();
 
     fuelAmount = 0;
@@ -14,6 +15,7 @@ void FuelPumpSystem::init() {
 }
 
 void FuelPumpSystem::update() {
+    input.update();
     handleStateEntry();
 
     switch(state) {
