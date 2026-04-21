@@ -11,7 +11,9 @@ void FuelPumpSystem::init() {
     // initialize simulation + pricing
     fuelAmount = 0;
     fuelRate = 0.05;
-    pricePerGallon = 4.35;
+    regPrice = 4.35;
+    premPrice = 4.95;
+    dieselPrice = 6.45;
     totalCost = 0;
     lastUpdateTime = millis();
 }
@@ -30,7 +32,18 @@ void FuelPumpSystem::update() {
         
         case FUEL_SELECTION:
             // wait for fuel selection input
-            if(input.fuelPressed()) {
+            if(input.fuel1Pressed()) {
+                selectedPrice = regPrice;
+                state = PUMPING;
+            }
+
+            else if(input.fuel2Pressed()) {
+                selectedPrice = premPrice;
+                state = PUMPING;
+            }
+
+            else if(input.fuel3Pressed()) {
+                selectedPrice = dieselPrice;
                 state = PUMPING;
             }
             break;
@@ -43,7 +56,7 @@ void FuelPumpSystem::update() {
                 lastUpdateTime = now;
 
                 fuelAmount += fuelRate;
-                totalCost = fuelAmount * pricePerGallon;
+                totalCost = fuelAmount * selectedPrice;
 
                 Serial.print("Fuel dispensed: ");
                 Serial.print(fuelAmount);

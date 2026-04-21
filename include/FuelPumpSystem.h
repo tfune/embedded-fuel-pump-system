@@ -28,7 +28,10 @@ private:
     float fuelRate;
 
     // pricing
-    float pricePerGallon;
+    float regPrice;
+    float premPrice;
+    float dieselPrice;
+    float selectedPrice;
     float totalCost;
 
     // runs once on state change

@@ -7,14 +7,14 @@ public:
     void init(); // initialize input system
     void update(); // poll keypad and update state
 
-    // event checks (true for one update cycle)
+    // system control events
     bool startPressed();
     bool stopPressed();
-    bool fuelPressed();
 
-    // numeric input handling
-    String getInputBuffer();
-    void clearBuffer();
+    // fuel selection events
+    bool fuel1Pressed();
+    bool fuel2Pressed();
+    bool fuel3Pressed();
 
 private:
     // keypad dimensions
@@ -35,12 +35,10 @@ private:
 
     Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
-    // internal state
-    char lastKey;
-    String inputBuffer;
-
     // one-cycle event flags
-    bool startEvent = false;
-    bool fuelEvent = false;
-    bool stopEvent = false;
+    bool startEvent;
+    bool stopEvent;
+    bool fuel1Event;
+    bool fuel2Event;
+    bool fuel3Event;
 };

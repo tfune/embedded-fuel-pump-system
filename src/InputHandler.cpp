@@ -1,42 +1,40 @@
 #include "InputHandler.h"
 
 void InputHandler::init() {
-    inputBuffer = "";
-    lastKey = '\0';
+    // initialize events
+    startEvent = false;
+    stopEvent = false;
+    fuel1Event = false;
+    fuel2Event = false;
+    fuel3Event = false;
 }
 
 void InputHandler::update() {
     // reset one-cycle events
     startEvent = false;
-    fuelEvent = false;
     stopEvent = false;
+    fuel1Event = false;
+    fuel2Event = false;
+    fuel3Event = false;
 
     // read key; exit if no input
     char key = keypad.getKey();
     if(!key) return;
-    lastKey = key;
 
-    // map keys to events
+    // system control mapping
     if(key == 'A') startEvent = true;
-    if(key == 'B') fuelEvent = true;
-    if(key == 'C') stopEvent = true;
+    if(key == 'B') stopEvent = true;
 
-    // build numeric input
-    if(key >= '0' && key <= '9') {
-        inputBuffer += key;
-    }
-
-    // clear input
-    if(key == '*') {
-        inputBuffer = "";
-    }
+    // fuel selection mapping
+    if(key == '1') fuel1Event = true;
+    if(key == '2') fuel2Event = true;
+    if(key == '3') fuel3Event = true;
 }
 
 // event getters
 bool InputHandler::startPressed() { return startEvent; }
-bool InputHandler::fuelPressed() { return fuelEvent; }
 bool InputHandler::stopPressed() { return stopEvent; }
 
-// input buffer access
-String InputHandler::getInputBuffer() { return inputBuffer; }
-void InputHandler::clearBuffer() { inputBuffer = ""; }
+bool InputHandler::fuel1Pressed() { return fuel1Event; }
+bool InputHandler::fuel2Pressed() { return fuel2Event; }
+bool InputHandler::fuel3Pressed() { return fuel3Event; }
