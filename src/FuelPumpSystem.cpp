@@ -2,8 +2,8 @@
 #include "FuelPumpSystem.h"
 
 void FuelPumpSystem::init() {
-    state = IDLE;
-    prevState = IDLE;
+    state = READY;
+    prevState = READY;
     input.init();
 
     fuelAmount = 0;
@@ -17,7 +17,7 @@ void FuelPumpSystem::update() {
     handleStateEntry();
 
     switch(state) {
-        case IDLE:
+        case READY:
             if(input.startPressed()) {
                 state = FUEL_SELECTION;
             }
@@ -52,7 +52,7 @@ void FuelPumpSystem::update() {
         }
         
         case COMPLETE:
-            state = IDLE;
+            state = READY;
             break;
     }
 }
@@ -60,8 +60,8 @@ void FuelPumpSystem::update() {
 void FuelPumpSystem::handleStateEntry() {
     if(state != prevState) {
         switch(state) {
-            case IDLE:
-                Serial.println("STATE: IDLE");
+            case READY:
+                Serial.println("STATE: READY");
                 break;
             
             case FUEL_SELECTION:

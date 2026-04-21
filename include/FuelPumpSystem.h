@@ -2,7 +2,7 @@
 #include "InputHandler.h"
 
 enum State {
-    IDLE,
+    READY,
     FUEL_SELECTION,
     PUMPING,
     COMPLETE

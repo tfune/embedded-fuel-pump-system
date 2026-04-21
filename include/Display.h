@@ -3,6 +3,6 @@
 class Display {
 public:
     void init();
-    void showIdle();
+    void showReady();
     void showMessage(const char* msg);
 };

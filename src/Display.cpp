@@ -5,8 +5,8 @@ void Display::init() {
     Serial.println("Display ready");
 }
 
-void Display::showIdle() {
-    Serial.println("State: IDLE");
+void Display::showReady() {
+    Serial.println("State: READY");
 }
 
 void Display::showMessage(const char* msg) {
