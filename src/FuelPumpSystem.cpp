@@ -2,11 +2,13 @@
 #include "FuelPumpSystem.h"
 
 void FuelPumpSystem::init() {
+    // initialize states
     state = READY;
-    prevState = READY;
+    prevState = COMPLETE; // force initial state entry (triggers state print)
 
-    input.init();
+    input.init(); // initialize input handler
 
+    // initialize simulation + pricing
     fuelAmount = 0;
     fuelRate = 0.05;
     pricePerGallon = 4.35;
@@ -15,17 +17,19 @@ void FuelPumpSystem::init() {
 }
 
 void FuelPumpSystem::update() {
-    input.update();
-    handleStateEntry();
+    input.update(); // poll user input
+    handleStateEntry(); // handle one-time state transitions
 
     switch(state) {
         case READY:
+            // wait for user to start transaction
             if(input.startPressed()) {
                 state = FUEL_SELECTION;
             }
             break;
         
         case FUEL_SELECTION:
+            // wait for fuel selection input
             if(input.fuelPressed()) {
                 state = PUMPING;
             }
@@ -34,19 +38,22 @@ void FuelPumpSystem::update() {
         case PUMPING: {
             unsigned long now = millis();
 
-            // Update fuel dispensed every 500 ms
+            // periodically update fuel dispensed and cost
             if(now - lastUpdateTime >= 500) {
                 lastUpdateTime = now;
+
                 fuelAmount += fuelRate;
                 totalCost = fuelAmount * pricePerGallon;
 
                 Serial.print("Fuel dispensed: ");
                 Serial.print(fuelAmount);
                 Serial.println(" gallons");
+
                 Serial.print("Total Cost: $");
                 Serial.println(totalCost);
             }
 
+            // stop pumping on user input
             if(input.stopPressed()) {
                 state = COMPLETE;
             }
@@ -54,12 +61,14 @@ void FuelPumpSystem::update() {
         }
         
         case COMPLETE:
+            // reset system for next transaction
             state = READY;
             break;
     }
 }
 
 void FuelPumpSystem::handleStateEntry() {
+    // execute once when entering a new state
     if(state != prevState) {
         switch(state) {
             case READY:
@@ -72,7 +81,7 @@ void FuelPumpSystem::handleStateEntry() {
 
             case PUMPING: 
                 Serial.println("STATE: PUMPING");
-                fuelAmount = 0;
+                fuelAmount = 0; // reset fuel for new session
                 break;
 
             case COMPLETE:
@@ -80,6 +89,6 @@ void FuelPumpSystem::handleStateEntry() {
                 break;
         }
 
-        prevState = state;
+        prevState = state; // update state tracker
     }
 }
