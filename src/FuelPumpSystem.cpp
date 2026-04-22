@@ -7,6 +7,7 @@ void FuelPumpSystem::init() {
     prevState = COMPLETE; // force initial state entry (triggers state print)
 
     input.init(); // initialize input handler
+    display.init(); // initialize OLED display
 
     // initialize simulation + pricing
     fuelAmount = 0;
@@ -58,12 +59,8 @@ void FuelPumpSystem::update() {
                 fuelAmount += fuelRate;
                 totalCost = fuelAmount * selectedPrice;
 
-                Serial.print("Fuel dispensed: ");
-                Serial.print(fuelAmount);
-                Serial.println(" gallons");
-
-                Serial.print("Total Cost: $");
-                Serial.println(totalCost);
+                // Update OLED with live data
+                display.showFuel(fuelAmount, totalCost);
             }
 
             // stop pumping on user input
@@ -85,20 +82,23 @@ void FuelPumpSystem::handleStateEntry() {
     if(state != prevState) {
         switch(state) {
             case READY:
-                Serial.println("STATE: READY");
+                display.showState("READY");
                 break;
             
             case FUEL_SELECTION:
-                Serial.println("STATE: FUEL_Selection");
+                display.showState("SELECT FUEL");
                 break;
 
             case PUMPING: 
-                Serial.println("STATE: PUMPING");
-                fuelAmount = 0; // reset fuel for new session
+                display.showState("PUMPING");
+                
+                // reset values when starting pump
+                fuelAmount = 0;
+                totalCost = 0;
                 break;
 
             case COMPLETE:
-                Serial.println("STATE: COMPLETE");
+                display.showState("Complete");
                 break;
         }
 

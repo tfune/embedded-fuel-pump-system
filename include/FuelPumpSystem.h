@@ -1,5 +1,6 @@
 #pragma once
 #include "InputHandler.h"
+#include "Display.h"
 
 // system states
 enum State {
@@ -19,15 +20,18 @@ private:
     State state;
     State prevState;
 
-    // handles all user input
-    InputHandler input;
+    // modules
+    InputHandler input; // handles all keypad input
+    Display display;    // handles OLED output
+    // handles
 
-    // timing + fuel simulation
+    // timing
     unsigned long lastUpdateTime;
+
+    // fuel + pricing
     float fuelAmount;
     float fuelRate;
 
-    // pricing
     float regPrice;
     float premPrice;
     float dieselPrice;
