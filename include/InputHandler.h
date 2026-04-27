@@ -10,6 +10,7 @@ public:
     // system control events
     bool startPressed();
     bool stopPressed();
+    bool exitPressed();
 
     // fuel selection events
     bool fuel1Pressed();
@@ -38,6 +39,7 @@ private:
     // one-cycle event flags
     bool startEvent;
     bool stopEvent;
+    bool exitEvent;
     bool fuel1Event;
     bool fuel2Event;
     bool fuel3Event;

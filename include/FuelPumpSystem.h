@@ -23,7 +23,6 @@ private:
     // modules
     InputHandler input; // handles all keypad input
     Display display;    // handles OLED output
-    // handles
 
     // timing
     unsigned long lastUpdateTime;
@@ -40,4 +39,7 @@ private:
 
     // runs once on state change
     void handleStateEntry();
+
+    // flag for cancelled transaction
+    bool wasCancelled;
 };

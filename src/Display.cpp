@@ -17,30 +17,82 @@ void Display::init() {
     oled.setTextColor(SSD1306_WHITE);
 }
 
-void Display::showState(const String& state) {
+void Display::showReadyScreen() {
     oled.clearDisplay();
 
     oled.setCursor(0,0);
-    oled.print("STATE: ");
-    oled.println(state);
+    oled.println("Welcome to Trevor's");
+    oled.print("Gas Station!");
+
+    oled.setCursor(0, 24);
+    oled.print("Press A to Start");
 
     oled.display();
 }
 
-void Display::showFuel(float fuel, float cost) {
+void Display::showFuelSelectionScreen() {
     oled.clearDisplay();
 
-    // Top (yellow)
+    oled.setCursor(0, 0);
+    oled.print("Select Fuel:");
+
+    oled.setCursor(0, 16);
+    oled.print("1: Regular");
+
+    oled.setCursor(0, 24);
+    oled.print("2: Premium");
+
+    oled.setCursor(0, 32);
+    oled.print("3: Diesel");
+
+    oled.display();
+}
+
+void Display::showPumpingScreen(float fuel, float cost) {
+    oled.clearDisplay();
+
     oled.setCursor(0,0);
-    oled.print("STATE: PUMPING");
+    oled.print("PUMPING");
 
-    // Bottom (blue)
-    oled.setCursor(0, 30);
+    oled.setCursor(0, 16);
     oled.print("Fuel: ");
-    oled.println(fuel);
+    oled.print(fuel);
 
+    oled.setCursor(0, 24);
     oled.print("Cost: $");
     oled.println(cost);
 
+    oled.setCursor(0, 40);
+    oled.print("Press B to Stop");
+
     oled.display();
 }
+
+ void Display::showCompleteScreen(bool cancelled, float fuel, float price, float total) {
+    oled.clearDisplay();
+
+    oled.setCursor(0, 0);
+    if(cancelled) {
+        oled.print("Transaction Cancelled");
+    }
+    else {
+        oled.print("Transaction Complete");
+    }
+
+    oled.setCursor(0, 16);
+    oled.print("Gallons: ");
+    oled.print(fuel);
+
+    oled.setCursor(0, 24);
+    oled.print("Price/Gallon: $");
+    oled.print(price);
+
+    oled.setCursor(0, 32);
+    oled.print("Total: $");
+    oled.print(total);
+
+    oled.setCursor(0, 48);
+    oled.print("Press A to Restart");
+
+    oled.display();
+ }

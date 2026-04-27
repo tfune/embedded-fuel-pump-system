@@ -5,8 +5,12 @@
 class Display {
 public:
     void init();
-    void showState(const String& state);
-    void showFuel(float fuel, float cost);
+
+    // different member function for each state
+    void showReadyScreen();
+    void showFuelSelectionScreen();
+    void showPumpingScreen(float fuel, float cost);
+    void showCompleteScreen(bool cancelled, float fuel, float price, float total);
 
 private:
     Adafruit_SSD1306 oled;

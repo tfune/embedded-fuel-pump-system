@@ -12,15 +12,22 @@ void FuelPumpSystem::init() {
     // initialize simulation + pricing
     fuelAmount = 0;
     fuelRate = 0.05;
-    regPrice = 4.35;
-    premPrice = 4.95;
-    dieselPrice = 6.45;
+    regPrice = 4.399;
+    premPrice = 4.999;
+    dieselPrice = 6.399;
     totalCost = 0;
     lastUpdateTime = millis();
 }
 
 void FuelPumpSystem::update() {
     input.update(); // poll user input
+
+    // GLOBAL EXIT: works in any state
+    if(input.exitPressed()) {
+        wasCancelled = true;
+        state = COMPLETE;
+    }
+
     handleStateEntry(); // handle one-time state transitions
 
     switch(state) {
@@ -59,20 +66,26 @@ void FuelPumpSystem::update() {
                 fuelAmount += fuelRate;
                 totalCost = fuelAmount * selectedPrice;
 
-                // Update OLED with live data
-                display.showFuel(fuelAmount, totalCost);
+                // Update OLED with live data 
+                display.showPumpingScreen(fuelAmount, totalCost);
             }
 
             // stop pumping on user input
             if(input.stopPressed()) {
+                wasCancelled = false;
                 state = COMPLETE;
             }
             break;
         }
         
         case COMPLETE:
-            // reset system for next transaction
-            state = READY;
+            // wait for user to restart
+            if(input.startPressed()) {
+                fuelAmount = 0;
+                selectedPrice = 0;
+                totalCost = 0;
+                state = READY;
+            }
             break;
     }
 }
@@ -82,23 +95,19 @@ void FuelPumpSystem::handleStateEntry() {
     if(state != prevState) {
         switch(state) {
             case READY:
-                display.showState("READY");
+                display.showReadyScreen();
                 break;
             
             case FUEL_SELECTION:
-                display.showState("SELECT FUEL");
+                display.showFuelSelectionScreen();
                 break;
 
             case PUMPING: 
-                display.showState("PUMPING");
-                
-                // reset values when starting pump
-                fuelAmount = 0;
-                totalCost = 0;
+                display.showPumpingScreen(fuelAmount, totalCost);
                 break;
 
             case COMPLETE:
-                display.showState("Complete");
+                display.showCompleteScreen(wasCancelled, fuelAmount, selectedPrice, totalCost);
                 break;
         }
 
