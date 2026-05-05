@@ -11,7 +11,7 @@ void FuelPumpSystem::init() {
 
     // initialize simulation + pricing
     fuelAmount = 0;
-    fuelRate = 0.05;
+    fuelRate = 0.08;
     regPrice = 4.399;
     premPrice = 4.999;
     dieselPrice = 6.399;
@@ -59,16 +59,20 @@ void FuelPumpSystem::update() {
         case PUMPING: {
             unsigned long now = millis();
 
-            // periodically update fuel dispensed and cost
-            if(now - lastUpdateTime >= 500) {
-                lastUpdateTime = now;
+            // only pump when button is held
+            if(input.pumpHeld()) {
 
-                fuelAmount += fuelRate;
-                totalCost = fuelAmount * selectedPrice;
+                // periodically update fuel dispensed and cost
+                if(now - lastUpdateTime >= 200) {
+                    lastUpdateTime = now;
 
-                // Update OLED with live data 
-                display.showPumpingScreen(fuelAmount, totalCost);
+                    fuelAmount += fuelRate;
+                    totalCost = fuelAmount * selectedPrice;
+                }
             }
+
+            // Update OLED display
+            display.showPumpingScreen(fuelAmount, totalCost);
 
             // stop pumping on user input
             if(input.stopPressed()) {

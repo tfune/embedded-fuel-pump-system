@@ -5,7 +5,7 @@
 class InputHandler {
 public:
     void init(); // initialize input system
-    void update(); // poll keypad and update state
+    void update(); // poll inputs and update state
 
     // system control events
     bool startPressed();
@@ -16,6 +16,9 @@ public:
     bool fuel1Pressed();
     bool fuel2Pressed();
     bool fuel3Pressed();
+
+    // pump control
+    bool pumpHeld();
 
 private:
     // keypad dimensions
@@ -35,6 +38,10 @@ private:
     byte colPins[COLS] = {26, 27, 28, 29};
 
     Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+
+    // pump button
+    static const int pumpPin = 37;
+    bool pumpState;
 
     // one-cycle event flags
     bool startEvent;

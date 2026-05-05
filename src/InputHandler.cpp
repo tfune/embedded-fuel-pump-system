@@ -8,6 +8,10 @@ void InputHandler::init() {
     fuel1Event = false;
     fuel2Event = false;
     fuel3Event = false; 
+
+    // initialize pump button
+    pinMode(pumpPin, INPUT_PULLUP);
+    pumpState = false;
 }
 
 void InputHandler::update() {
@@ -18,6 +22,9 @@ void InputHandler::update() {
     fuel1Event = false;
     fuel2Event = false;
     fuel3Event = false;
+
+    // read pump button (continuous input)
+    pumpState = (digitalRead(pumpPin) == LOW);
 
     // read key; exit if no input
     char key = keypad.getKey();
@@ -42,3 +49,8 @@ bool InputHandler::exitPressed() { return exitEvent; }
 bool InputHandler::fuel1Pressed() { return fuel1Event; }
 bool InputHandler::fuel2Pressed() { return fuel2Event; }
 bool InputHandler::fuel3Pressed() { return fuel3Event; }
+
+// continuous pump button
+bool InputHandler::pumpHeld() {
+    return pumpState;
+}
