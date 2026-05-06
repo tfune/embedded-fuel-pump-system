@@ -5,7 +5,7 @@
 volatile unsigned long flowPulseCount = 0;
 
 // calibration factor
-float calibrationFactor = 8.625;
+float calibrationFactor = 6.00;
 
 // interrupt service routine
 void flowPulseISR() {
@@ -100,6 +100,9 @@ void FuelPumpSystem::update() {
 
             // update OLED display
             display.showPumpingScreen(fuelAmount, totalCost);
+
+            Serial.print("Pulses: ");
+            Serial.println(flowPulseCount);
 
             // stop pumping on user input
             if(input.stopPressed()) {
