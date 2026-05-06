@@ -40,7 +40,7 @@ private:
     Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
     // pump button
-    static const int pumpPin = 37;
+    static const int pumpButtonPin = 37;
     bool pumpState;
 
     // one-cycle event flags

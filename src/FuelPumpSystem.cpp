@@ -9,6 +9,10 @@ void FuelPumpSystem::init() {
     input.init(); // initialize input handler
     display.init(); // initialize OLED display
 
+    // initialize pump pin
+    pinMode(pumpControlPin, OUTPUT);
+    digitalWrite(pumpControlPin, LOW);
+
     // initialize simulation + pricing
     fuelAmount = 0;
     fuelRate = 0.08;
@@ -25,6 +29,7 @@ void FuelPumpSystem::update() {
     // GLOBAL EXIT: works in any state
     if(input.exitPressed()) {
         wasCancelled = true;
+        digitalWrite(pumpControlPin, LOW);
         state = COMPLETE;
     }
 
@@ -32,6 +37,9 @@ void FuelPumpSystem::update() {
 
     switch(state) {
         case READY:
+            // pump off
+            digitalWrite(pumpControlPin, LOW);
+
             // wait for user to start transaction
             if(input.startPressed()) {
                 state = FUEL_SELECTION;
@@ -39,6 +47,9 @@ void FuelPumpSystem::update() {
             break;
         
         case FUEL_SELECTION:
+            // pump off
+            digitalWrite(pumpControlPin, LOW);
+
             // wait for fuel selection input
             if(input.fuel1Pressed()) {
                 selectedPrice = regPrice;
@@ -61,6 +72,7 @@ void FuelPumpSystem::update() {
 
             // only pump when button is held
             if(input.pumpHeld()) {
+                digitalWrite(pumpControlPin, HIGH);
 
                 // periodically update fuel dispensed and cost
                 if(now - lastUpdateTime >= 200) {
@@ -69,6 +81,8 @@ void FuelPumpSystem::update() {
                     fuelAmount += fuelRate;
                     totalCost = fuelAmount * selectedPrice;
                 }
+            }  else {
+                    digitalWrite(pumpControlPin, LOW);
             }
 
             // Update OLED display
@@ -76,6 +90,7 @@ void FuelPumpSystem::update() {
 
             // stop pumping on user input
             if(input.stopPressed()) {
+                digitalWrite(pumpControlPin, LOW);
                 wasCancelled = false;
                 state = COMPLETE;
             }
@@ -83,6 +98,9 @@ void FuelPumpSystem::update() {
         }
         
         case COMPLETE:
+            // pump off
+            digitalWrite(pumpControlPin, LOW);
+
             // wait for user to restart
             if(input.startPressed()) {
                 fuelAmount = 0;

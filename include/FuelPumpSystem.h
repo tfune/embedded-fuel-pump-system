@@ -42,4 +42,7 @@ private:
 
     // flag for cancelled transaction
     bool wasCancelled;
+
+    // pump control pin
+    const int pumpControlPin = 47;
 };
