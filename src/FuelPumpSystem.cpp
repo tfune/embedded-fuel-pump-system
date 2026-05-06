@@ -1,6 +1,17 @@
 #include <Arduino.h>
 #include "FuelPumpSystem.h"
 
+// pulse counter updated by interrupt
+volatile unsigned long flowPulseCount = 0;
+
+// calibration factor
+float calibrationFactor = 8.625;
+
+// interrupt service routine
+void flowPulseISR() {
+    flowPulseCount++;
+}
+
 void FuelPumpSystem::init() {
     // initialize states
     state = READY;
@@ -13,13 +24,21 @@ void FuelPumpSystem::init() {
     pinMode(pumpControlPin, OUTPUT);
     digitalWrite(pumpControlPin, LOW);
 
-    // initialize simulation + pricing
+    // initialize flow sensor
+    pinMode(flowSensorPin, INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(flowSensorPin), flowPulseISR, RISING);
+
+    // reset counters
+    flowPulseCount = 0;
     fuelAmount = 0;
-    fuelRate = 0.08;
+    selectedPrice = 0;
+    totalCost = 0;
+
+    // initialize pricing
     regPrice = 4.399;
     premPrice = 4.999;
     dieselPrice = 6.399;
-    totalCost = 0;
+
     lastUpdateTime = millis();
 }
 
@@ -68,24 +87,18 @@ void FuelPumpSystem::update() {
             break;
         
         case PUMPING: {
-            unsigned long now = millis();
-
             // only pump when button is held
             if(input.pumpHeld()) {
                 digitalWrite(pumpControlPin, HIGH);
-
-                // periodically update fuel dispensed and cost
-                if(now - lastUpdateTime >= 200) {
-                    lastUpdateTime = now;
-
-                    fuelAmount += fuelRate;
-                    totalCost = fuelAmount * selectedPrice;
-                }
             }  else {
                     digitalWrite(pumpControlPin, LOW);
             }
 
-            // Update OLED display
+            // flow sensor calculation
+            fuelAmount = flowPulseCount / calibrationFactor;
+            totalCost = fuelAmount * selectedPrice;
+
+            // update OLED display
             display.showPumpingScreen(fuelAmount, totalCost);
 
             // stop pumping on user input
@@ -103,6 +116,7 @@ void FuelPumpSystem::update() {
 
             // wait for user to restart
             if(input.startPressed()) {
+                flowPulseCount = 0;
                 fuelAmount = 0;
                 selectedPrice = 0;
                 totalCost = 0;

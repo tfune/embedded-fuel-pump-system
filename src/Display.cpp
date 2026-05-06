@@ -53,7 +53,8 @@ void Display::showPumpingScreen(float fuel, float cost) {
 
     oled.setCursor(0, 24);
     oled.print("Fuel: ");
-    oled.println(fuel);
+    oled.print(fuel);
+    oled.println(" ounces");
 
     oled.print("Cost: $");
     oled.print(cost);
@@ -76,11 +77,11 @@ void Display::showPumpingScreen(float fuel, float cost) {
     }
 
     oled.setCursor(0, 16);
-    oled.print("Gallons: ");
+    oled.print("Ounces: ");
     oled.print(fuel);
 
     oled.setCursor(0, 24);
-    oled.print("Price/Gallon: $");
+    oled.print("Price/Ounce: $");
     oled.print(price);
 
     oled.setCursor(0, 32);

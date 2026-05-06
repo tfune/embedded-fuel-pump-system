@@ -29,8 +29,6 @@ private:
 
     // fuel + pricing
     float fuelAmount;
-    float fuelRate;
-
     float regPrice;
     float premPrice;
     float dieselPrice;
@@ -45,4 +43,7 @@ private:
 
     // pump control pin
     const int pumpControlPin = 47;
+
+    // flow sensor pin
+    const int flowSensorPin = 2;
 };
