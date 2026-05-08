@@ -2,10 +2,11 @@
 #include <Arduino.h>
 #include <Keypad.h>
 
+// Handles keypad input and pump trigger button events
 class InputHandler {
 public:
-    void init(); // initialize input system
-    void update(); // poll inputs and update state
+    void init(); // initialize input hardware
+    void update(); // poll all inputs and update event states
 
     // system control events
     bool startPressed();
@@ -17,7 +18,7 @@ public:
     bool fuel2Pressed();
     bool fuel3Pressed();
 
-    // pump control
+    // pump trigger state
     bool pumpHeld();
 
 private:
@@ -25,7 +26,7 @@ private:
     static const byte ROWS = 4;
     static const byte COLS = 4;
 
-    // key layout
+    // keypad layout
     char keys[ROWS][COLS] = {
         {'1', '2', '3', 'A'},
         {'4', '5', '6', 'B'},
@@ -33,21 +34,22 @@ private:
         {'*', '0', '#', 'D'}
     };
 
-    // hardwire pin mapping
+    // Arduino pin mapping
     byte rowPins[ROWS] = {22, 23, 24, 25};
     byte colPins[COLS] = {26, 27, 28, 29};
 
+    // keypad object
     Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
-    // pump button
+    // pump trigger button
     static const int pumpButtonPin = 37;
-    bool pumpState;
+    bool pumpState = false;
 
-    // one-cycle event flags
-    bool startEvent;
-    bool stopEvent;
-    bool exitEvent;
-    bool fuel1Event;
-    bool fuel2Event;
-    bool fuel3Event;
+    // one-cycle keypad event flags
+    bool startEvent = false;
+    bool stopEvent = false;
+    bool exitEvent = false;
+    bool fuel1Event = false;
+    bool fuel2Event = false;
+    bool fuel3Event = false;
 };

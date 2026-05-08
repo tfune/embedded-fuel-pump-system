@@ -2,7 +2,7 @@
 #include "InputHandler.h"
 #include "Display.h"
 
-// system states
+// fuel pump system states
 enum State {
     READY,
     FUEL_SELECTION,
@@ -10,40 +10,44 @@ enum State {
     COMPLETE
 };
 
+// main application state machine
 class FuelPumpSystem {
 public:
-    void init(); // initialize system state
-    void update(); // run state machine
+    // initialize system hardware and variables
+    void init();
+
+    // execute one cycle of the system state machine
+    void update();
 
 private:
-    // state tracking
+    // state machine tracking tracking
     State state;
     State prevState;
 
-    // modules
+    // handle one-time state entry actions
+    void handleStateEntry();
+
+    // system modules
     InputHandler input; // handles all keypad input
     Display display;    // handles OLED output
 
     // timing
     unsigned long lastUpdateTime;
 
-    // fuel + pricing
-    float fuelAmount;
-    float regPrice;
-    float premPrice;
-    float dieselPrice;
-    float selectedPrice;
-    float totalCost;
+    // fuel transaction data
+    float fuelAmount = 0.0f;
+    float regPrice = 0.0f;
+    float premPrice = 0.0f;
+    float dieselPrice = 0.0f;
+    float selectedPrice = 0.0f;
+    float totalCost = 0.0f;
 
-    // runs once on state change
-    void handleStateEntry();
-
-    // flag for cancelled transaction
+    // true if transaction exited before completion
     bool wasCancelled;
 
-    // pump control pin
+    // MOSFET gate control pin
     const int pumpControlPin = 47;
 
-    // flow sensor pin
+    // interrupt-capable flow sensor pin
     const int flowSensorPin = 2;
 };

@@ -1,12 +1,15 @@
 #include "Display.h"
 #include <Wire.h>
 
+// OLED display dimensions
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 
+// initialize OLED display
 void Display::init() {
     oled = Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
+    // halt system if OLED initialization fails
     if (!oled.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
         Serial.println("OLED init failed");
         while (true);
@@ -17,6 +20,7 @@ void Display::init() {
     oled.setTextColor(SSD1306_WHITE);
 }
 
+// ready state screen
 void Display::showReadyScreen() {
     oled.clearDisplay();
 
@@ -30,6 +34,7 @@ void Display::showReadyScreen() {
     oled.display();
 }
 
+// fuel selection state screen
 void Display::showFuelSelectionScreen() {
     oled.clearDisplay();
 
@@ -44,6 +49,7 @@ void Display::showFuelSelectionScreen() {
     oled.display();
 }
 
+// pumping state screen
 void Display::showPumpingScreen(float fuel, float cost) {
     oled.clearDisplay();
 
@@ -65,6 +71,7 @@ void Display::showPumpingScreen(float fuel, float cost) {
     oled.display();
 }
 
+// complete state screen
  void Display::showCompleteScreen(bool cancelled, float fuel, float price, float total) {
     oled.clearDisplay();
 

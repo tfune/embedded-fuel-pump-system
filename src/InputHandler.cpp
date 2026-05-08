@@ -1,17 +1,8 @@
 #include "InputHandler.h"
 
 void InputHandler::init() {
-    // initialize events
-    startEvent = false;
-    stopEvent = false;
-    exitEvent = false;
-    fuel1Event = false;
-    fuel2Event = false;
-    fuel3Event = false; 
-
-    // initialize pump button
+    // initialize pump trigger button
     pinMode(pumpButtonPin, INPUT_PULLUP);
-    pumpState = false;
 }
 
 void InputHandler::update() {
@@ -23,11 +14,13 @@ void InputHandler::update() {
     fuel2Event = false;
     fuel3Event = false;
 
-    // read pump button (continuous input)
+    // read continuous pump trigger state
     pumpState = (digitalRead(pumpButtonPin) == LOW);
 
-    // read key; exit if no input
+    // read keypad input
     char key = keypad.getKey();
+
+    // no key pressed
     if(!key) return;
 
     // system control mapping
@@ -50,7 +43,7 @@ bool InputHandler::fuel1Pressed() { return fuel1Event; }
 bool InputHandler::fuel2Pressed() { return fuel2Event; }
 bool InputHandler::fuel3Pressed() { return fuel3Event; }
 
-// continuous pump button
+// continuous trigger state getter
 bool InputHandler::pumpHeld() {
-    return pumpState;
+    return pumpState; // returns true when trigger button is held
 }

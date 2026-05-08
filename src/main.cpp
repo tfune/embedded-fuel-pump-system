@@ -2,13 +2,17 @@
 #include <Keypad.h>
 #include "FuelPumpSystem.h"
 
-FuelPumpSystem fuelPump; // main system interface
+// global instance of fuel pump system
+FuelPumpSystem fuelPump;
 
 void setup() {
-    Serial.begin(9600); // initialize serial output
-    fuelPump.init(); // initialize system
+    Serial.begin(9600);
+
+    // initialize all hardware + system modules
+    fuelPump.init();
 }
 
 void loop() {
-    fuelPump.update(); // run main system loop
+    // run one iteration of the state machine
+    fuelPump.update();
 }

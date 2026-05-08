@@ -1,13 +1,14 @@
 #include <Arduino.h>
 #include "FuelPumpSystem.h"
 
-// pulse counter updated by interrupt
+// flow sensor pulse counter updated asynchronously by ISR
 volatile unsigned long flowPulseCount = 0;
 
-// calibration factor
-float calibrationFactor = 6.00;
+// calibration factor (pulses/ounce)
+float calibrationFactor = 6.0f;
 
-// interrupt service routine
+// flow sensor interrupt service routine
+// executes on every detected sensor pulse
 void flowPulseISR() {
     flowPulseCount++;
 }
@@ -15,61 +16,64 @@ void flowPulseISR() {
 void FuelPumpSystem::init() {
     // initialize states
     state = READY;
-    prevState = COMPLETE; // force initial state entry (triggers state print)
+    prevState = COMPLETE; // force initial state entry handling
 
-    input.init(); // initialize input handler
-    display.init(); // initialize OLED display
+    // initialize system modules
+    input.init();
+    display.init();
 
-    // initialize pump pin
+    // initialize pump control output
     pinMode(pumpControlPin, OUTPUT);
     digitalWrite(pumpControlPin, LOW);
 
-    // initialize flow sensor
+    // initialize flow sensor interrupt
     pinMode(flowSensorPin, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(flowSensorPin), flowPulseISR, RISING);
 
-    // reset counters
-    flowPulseCount = 0;
-    fuelAmount = 0;
-    selectedPrice = 0;
-    totalCost = 0;
+    // initialize fuel pricing
+    regPrice = 4.399f;
+    premPrice = 4.999f;
+    dieselPrice = 6.399f;
 
-    // initialize pricing
-    regPrice = 4.399;
-    premPrice = 4.999;
-    dieselPrice = 6.399;
+    // initialize transaction data
+    flowPulseCount = 0;
+    fuelAmount = 0.0f;
+    selectedPrice = 0.0f;
+    totalCost = 0.0f;
 
     lastUpdateTime = millis();
 }
 
+// main system update loop
 void FuelPumpSystem::update() {
-    input.update(); // poll user input
+    // poll user input
+    input.update();
 
-    // GLOBAL EXIT: works in any state
+    // global exit handling
     if(input.exitPressed()) {
         wasCancelled = true;
         digitalWrite(pumpControlPin, LOW);
         state = COMPLETE;
     }
 
-    handleStateEntry(); // handle one-time state transitions
+    // execute one-time state entry actions
+    handleStateEntry();
 
+    // main state machine
     switch(state) {
+        // ready state
         case READY:
-            // pump off
             digitalWrite(pumpControlPin, LOW);
 
-            // wait for user to start transaction
             if(input.startPressed()) {
                 state = FUEL_SELECTION;
             }
             break;
         
+        // fuel selection state
         case FUEL_SELECTION:
-            // pump off
             digitalWrite(pumpControlPin, LOW);
 
-            // wait for fuel selection input
             if(input.fuel1Pressed()) {
                 selectedPrice = regPrice;
                 state = PUMPING;
@@ -86,25 +90,28 @@ void FuelPumpSystem::update() {
             }
             break;
         
+        // pumping state
         case PUMPING: {
-            // only pump when button is held
+            // pump only runs while trigger is held
             if(input.pumpHeld()) {
                 digitalWrite(pumpControlPin, HIGH);
             }  else {
                     digitalWrite(pumpControlPin, LOW);
             }
 
-            // flow sensor calculation
+            // convert pulses to fuel amount
             fuelAmount = flowPulseCount / calibrationFactor;
+
+            // calculate running total
             totalCost = fuelAmount * selectedPrice;
 
-            // update OLED display
-            display.showPumpingScreen(fuelAmount, totalCost);
+            // periodically refresh OLED display
+            if(millis() - lastUpdateTime >= 100) {
+                lastUpdateTime = millis();
+                display.showPumpingScreen(fuelAmount, totalCost);
+            }
 
-            Serial.print("Pulses: ");
-            Serial.println(flowPulseCount);
-
-            // stop pumping on user input
+            // complete transaction
             if(input.stopPressed()) {
                 digitalWrite(pumpControlPin, LOW);
                 wasCancelled = false;
@@ -113,24 +120,29 @@ void FuelPumpSystem::update() {
             break;
         }
         
+        // complete state
         case COMPLETE:
-            // pump off
             digitalWrite(pumpControlPin, LOW);
 
-            // wait for user to restart
+            // reset system for next transaction
             if(input.startPressed()) {
                 flowPulseCount = 0;
-                fuelAmount = 0;
-                selectedPrice = 0;
-                totalCost = 0;
+
+                fuelAmount = 0.0f;
+                selectedPrice = 0.0f;
+                totalCost = 0.0;
+
+                wasCancelled = false;
+
                 state = READY;
             }
             break;
     }
 }
 
+// execute one-time logic when entering a new state
 void FuelPumpSystem::handleStateEntry() {
-    // execute once when entering a new state
+    // state has changed
     if(state != prevState) {
         switch(state) {
             case READY:
@@ -150,6 +162,7 @@ void FuelPumpSystem::handleStateEntry() {
                 break;
         }
 
-        prevState = state; // update state tracker
+        // update previous state tracker
+        prevState = state;
     }
 }
