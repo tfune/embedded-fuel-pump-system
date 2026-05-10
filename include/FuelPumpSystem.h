@@ -1,6 +1,7 @@
 #pragma once
 #include "InputHandler.h"
 #include "Display.h"
+#include "FlowSensor.h"
 
 // fuel pump system states
 enum State {
@@ -30,6 +31,7 @@ private:
     // system modules
     InputHandler input; // handles all keypad input
     Display display;    // handles OLED output
+    FlowSensor flowSensor; // handles flow sensor
 
     // timing
     unsigned long lastUpdateTime;

@@ -1,18 +1,6 @@
 #include <Arduino.h>
 #include "FuelPumpSystem.h"
 
-// flow sensor pulse counter updated asynchronously by ISR
-volatile unsigned long flowPulseCount = 0;
-
-// calibration factor (pulses/ounce)
-float calibrationFactor = 6.0f;
-
-// flow sensor interrupt service routine
-// executes on every detected sensor pulse
-void flowPulseISR() {
-    flowPulseCount++;
-}
-
 void FuelPumpSystem::init() {
     // initialize states
     state = READY;
@@ -27,8 +15,7 @@ void FuelPumpSystem::init() {
     digitalWrite(pumpControlPin, LOW);
 
     // initialize flow sensor interrupt
-    pinMode(flowSensorPin, INPUT_PULLUP);
-    attachInterrupt(digitalPinToInterrupt(flowSensorPin), flowPulseISR, RISING);
+    flowSensor.init(flowSensorPin);
 
     // initialize fuel pricing
     regPrice = 4.399f;
@@ -36,7 +23,6 @@ void FuelPumpSystem::init() {
     dieselPrice = 6.399f;
 
     // initialize transaction data
-    flowPulseCount = 0;
     fuelAmount = 0.0f;
     selectedPrice = 0.0f;
     totalCost = 0.0f;
@@ -99,15 +85,8 @@ void FuelPumpSystem::update() {
                     digitalWrite(pumpControlPin, LOW);
             }
 
-            // safely copy ISR-updated pulse count
-            unsigned long pulseSnapshot;
-
-            noInterrupts();
-            pulseSnapshot = flowPulseCount;
-            interrupts();
-
-            // convert pulses to fuel amount
-            fuelAmount = flowPulseCount / calibrationFactor;
+            // get fuel amount from flow sensor
+            fuelAmount = flowSensor.getFuelAmount();
 
             // calculate running total
             totalCost = fuelAmount * selectedPrice;
@@ -133,7 +112,7 @@ void FuelPumpSystem::update() {
 
             // reset system for next transaction
             if(input.startPressed()) {
-                flowPulseCount = 0;
+                flowSensor.reset();
 
                 fuelAmount = 0.0f;
                 selectedPrice = 0.0f;
