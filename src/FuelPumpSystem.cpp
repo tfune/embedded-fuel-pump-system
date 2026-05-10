@@ -99,6 +99,13 @@ void FuelPumpSystem::update() {
                     digitalWrite(pumpControlPin, LOW);
             }
 
+            // safely copy ISR-updated pulse count
+            unsigned long pulseSnapshot;
+
+            noInterrupts();
+            pulseSnapshot = flowPulseCount;
+            interrupts();
+
             // convert pulses to fuel amount
             fuelAmount = flowPulseCount / calibrationFactor;
 
