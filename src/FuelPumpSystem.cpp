@@ -9,12 +9,7 @@ void FuelPumpSystem::init() {
     // initialize system modules
     input.init();
     display.init();
-
-    // initialize pump control output
-    pinMode(pumpControlPin, OUTPUT);
-    digitalWrite(pumpControlPin, LOW);
-
-    // initialize flow sensor interrupt
+    pump.init(pumpControlPin);
     flowSensor.init(flowSensorPin);
 
     // initialize fuel pricing
@@ -38,7 +33,7 @@ void FuelPumpSystem::update() {
     // global exit handling
     if(input.exitPressed()) {
         wasCancelled = true;
-        digitalWrite(pumpControlPin, LOW);
+        pump.stop();
         state = COMPLETE;
     }
 
@@ -49,7 +44,7 @@ void FuelPumpSystem::update() {
     switch(state) {
         // ready state
         case READY:
-            digitalWrite(pumpControlPin, LOW);
+            pump.stop();
 
             if(input.startPressed()) {
                 state = FUEL_SELECTION;
@@ -58,7 +53,7 @@ void FuelPumpSystem::update() {
         
         // fuel selection state
         case FUEL_SELECTION:
-            digitalWrite(pumpControlPin, LOW);
+            pump.stop();
 
             if(input.fuel1Pressed()) {
                 selectedPrice = regPrice;
@@ -80,9 +75,9 @@ void FuelPumpSystem::update() {
         case PUMPING: {
             // pump only runs while trigger is held
             if(input.pumpHeld()) {
-                digitalWrite(pumpControlPin, HIGH);
+                pump.start();
             }  else {
-                    digitalWrite(pumpControlPin, LOW);
+                    pump.stop();
             }
 
             // get fuel amount from flow sensor
@@ -99,7 +94,7 @@ void FuelPumpSystem::update() {
 
             // complete transaction
             if(input.stopPressed()) {
-                digitalWrite(pumpControlPin, LOW);
+                pump.stop();
                 wasCancelled = false;
                 state = COMPLETE;
             }
@@ -108,7 +103,7 @@ void FuelPumpSystem::update() {
         
         // complete state
         case COMPLETE:
-            digitalWrite(pumpControlPin, LOW);
+            pump.stop();
 
             // reset system for next transaction
             if(input.startPressed()) {

@@ -32,6 +32,17 @@ float FlowSensor::getFuelAmount() {
     return pulseSnapshot / calibrationFactor;
 }
 
+// safely return current pulse count
+unsigned long FlowSensor::getPulseCount() {
+    unsigned long pulseSnapshot;
+
+    noInterrupts();
+    pulseSnapshot = pulseCount;
+    interrupts();
+
+    return pulseSnapshot;
+}
+
 // reset transaction data
 void FlowSensor::reset() {
     noInterrupts();
