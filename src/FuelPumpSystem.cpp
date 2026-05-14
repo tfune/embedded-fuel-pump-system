@@ -75,9 +75,23 @@ void FuelPumpSystem::update() {
         case PUMPING: {
             // pump only runs while trigger is held
             if(input.pumpHeld()) {
+                // start timeout timer when pump first activates
+                if(!pump.isRunning()) {
+                    pumpStartTime = millis();
+                }
+
                 pump.start();
             }  else {
                     pump.stop();
+            }
+
+            // automatic timeout protection
+            if(pump.isRunning() && 
+                millis() - pumpStartTime >= MAX_PUMP_TIME)
+            {
+                pump.stop();
+                state = ERROR;
+                break;
             }
 
             // get fuel amount from flow sensor
@@ -118,6 +132,15 @@ void FuelPumpSystem::update() {
                 state = READY;
             }
             break;
+
+        case ERROR:
+            pump.stop();
+
+            if(input.startPressed()) {
+                state = READY;
+            }
+
+            break;
     }
 }
 
@@ -140,6 +163,10 @@ void FuelPumpSystem::handleStateEntry() {
 
             case COMPLETE:
                 display.showCompleteScreen(wasCancelled, fuelAmount, selectedPrice, totalCost);
+                break;
+
+            case ERROR:
+                display.showErrorScreen();
                 break;
         }
 

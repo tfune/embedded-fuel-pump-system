@@ -9,7 +9,8 @@ enum State {
     READY,
     FUEL_SELECTION,
     PUMPING,
-    COMPLETE
+    COMPLETE,
+    ERROR
 };
 
 // main application state machine
@@ -37,6 +38,8 @@ private:
 
     // timing
     unsigned long lastUpdateTime;
+    unsigned long pumpStartTime = 0;
+    const unsigned long MAX_PUMP_TIME = 30000;
 
     // fuel transaction data
     float fuelAmount = 0.0f;
