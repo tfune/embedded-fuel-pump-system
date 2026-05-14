@@ -5,13 +5,14 @@
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 
-// initialize OLED display
+// Initialize OLED display hardware
 void Display::init() {
     oled = Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
-    // halt system if OLED initialization fails
+    // Halt system if display initialization fails
     if (!oled.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
         Serial.println("OLED init failed");
+
         while (true);
     }
 
@@ -20,7 +21,7 @@ void Display::init() {
     oled.setTextColor(SSD1306_WHITE);
 }
 
-// ready state screen
+// Display ready state screen
 void Display::showReadyScreen() {
     oled.clearDisplay();
 
@@ -34,7 +35,7 @@ void Display::showReadyScreen() {
     oled.display();
 }
 
-// fuel selection state screen
+// Display fuel selection screen
 void Display::showFuelSelectionScreen() {
     oled.clearDisplay();
 
@@ -49,18 +50,18 @@ void Display::showFuelSelectionScreen() {
     oled.display();
 }
 
-// pumping state screen
+// Display active fueling information
 void Display::showPumpingScreen(float fuel, float cost) {
     oled.clearDisplay();
 
     oled.setCursor(0,0);
-    oled.println("Press button to begin");
-    oled.print("fueling");
+    oled.println("Press button to");
+    oled.print("begin fueling");
 
     oled.setCursor(0, 24);
     oled.print("Fuel: ");
     oled.print(fuel);
-    oled.println(" ounces");
+    oled.println(" oz");
 
     oled.print("Cost: $");
     oled.print(cost);
@@ -71,7 +72,7 @@ void Display::showPumpingScreen(float fuel, float cost) {
     oled.display();
 }
 
-// complete state screen
+// Display completed transaction summary
  void Display::showCompleteScreen(bool cancelled, float fuel, float price, float total) {
     oled.clearDisplay();
 
@@ -101,7 +102,7 @@ void Display::showPumpingScreen(float fuel, float cost) {
     oled.display();
  }
 
- // error state screen
+ // Display system fault message
  void Display::showErrorScreen(const char* errorMessage) {
     oled.clearDisplay();
 

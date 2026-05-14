@@ -1,14 +1,14 @@
 #include "FlowSensor.h"
 
-// shared ISR pulse counter
+// Shared ISR pulse counter
 volatile unsigned long FlowSensor::pulseCount = 0;
 
-// interrupt service routine
+// Interrupt service routine for flow sensor pulses
 void FlowSensor::pulseISR() {
     pulseCount++;
 }
 
-// initialize sensor and interrupt
+// Initialize flow sensor input and interrupt handling
 void FlowSensor::init(uint8_t pin) {
     sensorPin = pin;
 
@@ -21,10 +21,11 @@ void FlowSensor::init(uint8_t pin) {
     );
 }
 
-// safely calculate fuel amount
+// Return calculated fuel volume in ounces
 float FlowSensor::getFuelAmount() {
     unsigned long pulseSnapshot;
 
+    // Atomically copy ISR-updated pulse count
     noInterrupts();
     pulseSnapshot = pulseCount;
     interrupts();
@@ -32,10 +33,11 @@ float FlowSensor::getFuelAmount() {
     return pulseSnapshot / calibrationFactor;
 }
 
-// safely return current pulse count
+// Return current pulse count snapshot
 unsigned long FlowSensor::getPulseCount() {
     unsigned long pulseSnapshot;
 
+    // Atomically copy ISR-updated pulse count
     noInterrupts();
     pulseSnapshot = pulseCount;
     interrupts();
@@ -43,7 +45,7 @@ unsigned long FlowSensor::getPulseCount() {
     return pulseSnapshot;
 }
 
-// reset transaction data
+// Reset pulse count for next transaction
 void FlowSensor::reset() {
     noInterrupts();
     pulseCount = 0;

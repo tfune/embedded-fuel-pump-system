@@ -1,18 +1,17 @@
 #include <Arduino.h>
-#include <Keypad.h>
 #include "FuelPumpSystem.h"
 
-// global instance of fuel pump system
+// Main fuel pump system controller instance
 FuelPumpSystem fuelPump;
 
 void setup() {
     Serial.begin(9600);
 
-    // initialize all hardware + system modules
+    // Initialize all system hardware and drivers
     fuelPump.init();
 }
 
 void loop() {
-    // run one iteration of the state machine
+    // Execute one iteration of the application state machine
     fuelPump.update();
 }

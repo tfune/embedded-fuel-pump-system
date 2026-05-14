@@ -1,48 +1,44 @@
 #include <Arduino.h>
 #include "FuelPumpSystem.h"
 
+// Initialize system hardware, drivers, and transaction state
 void FuelPumpSystem::init() {
-    // initialize states
     state = READY;
-    prevState = COMPLETE; // force initial state entry handling
+    prevState = COMPLETE; // Forces initial display state
 
-    // initialize system modules
     input.init();
     display.init();
     pump.init(pumpControlPin);
     flowSensor.init(flowSensorPin);
 
-    // initialize fuel pricing
     regPrice = 4.399f;
     premPrice = 4.999f;
     dieselPrice = 6.399f;
 
-    // initialize transaction data
     fuelAmount = 0.0f;
     selectedPrice = 0.0f;
     totalCost = 0.0f;
 
+    wasCancelled = false;
+    currentError = NO_ERROR;
+
     lastUpdateTime = millis();
 }
 
-// main system update loop
+// Execute one state machine cycle
 void FuelPumpSystem::update() {
-    // poll user input
     input.update();
 
-    // global exit handling
+    // Allow user to cancel the current transaction
     if(input.exitPressed()) {
         wasCancelled = true;
         pump.stop();
         state = COMPLETE;
     }
 
-    // execute one-time state entry actions
     handleStateEntry();
 
-    // main state machine
     switch(state) {
-        // ready state
         case READY:
             pump.stop();
 
@@ -51,7 +47,6 @@ void FuelPumpSystem::update() {
             }
             break;
         
-        // fuel selection state
         case FUEL_SELECTION:
             pump.stop();
 
@@ -71,15 +66,13 @@ void FuelPumpSystem::update() {
             }
             break;
         
-        // pumping state
         case PUMPING: {
-            // pump only runs while trigger is held
+            // Run pump only while trigger is held
             if(input.pumpHeld()) {
-                // start timeout timer when pump first activates
+                // Start timeout and flow monitoring when pump first activates
                 if(!pump.isRunning()) {
                     pumpStartTime = millis();
 
-                    // initialize flow fault tracking
                     previousPulseCount = flowSensor.getPulseCount();
                     lastFlowCheckTime = millis();
                 }
@@ -89,7 +82,7 @@ void FuelPumpSystem::update() {
                     pump.stop();
             }
 
-            // automatic timeout protection
+            // Stop pump if maximum runtime is exceeded
             if(pump.isRunning() && 
                 millis() - pumpStartTime >= MAX_PUMP_TIME)
             {
@@ -99,14 +92,13 @@ void FuelPumpSystem::update() {
                 break;
             }
 
-            // detect pump running without flow pulses
+            // Detect pump operation without flow sensor pulse activity
             if(pump.isRunning() &&
                 millis() - lastFlowCheckTime >= FLOW_CHECK_INTERVAL)
             {
                 lastFlowCheckTime = millis();
                 unsigned long currentPulseCount = flowSensor.getPulseCount();
 
-                // enter error state if no new pulses
                 if(currentPulseCount == previousPulseCount) {
                     pump.stop();
                     currentError = FLOW_ERROR;
@@ -114,23 +106,18 @@ void FuelPumpSystem::update() {
                     break;
                 }
 
-                // update previous pulse snapshot
                 previousPulseCount = currentPulseCount;
             }
 
-            // get fuel amount from flow sensor
             fuelAmount = flowSensor.getFuelAmount();
-
-            // calculate running total
             totalCost = fuelAmount * selectedPrice;
 
-            // periodically refresh OLED display
+            // Refresh OLED at fixed interval
             if(millis() - lastUpdateTime >= 100) {
                 lastUpdateTime = millis();
                 display.showPumpingScreen(fuelAmount, totalCost);
             }
 
-            // complete transaction
             if(input.stopPressed()) {
                 pump.stop();
                 wasCancelled = false;
@@ -138,18 +125,16 @@ void FuelPumpSystem::update() {
             }
             break;
         }
-        
-        // complete state
+
         case COMPLETE:
             pump.stop();
 
-            // reset system for next transaction
             if(input.startPressed()) {
                 flowSensor.reset();
 
                 fuelAmount = 0.0f;
                 selectedPrice = 0.0f;
-                totalCost = 0.0;
+                totalCost = 0.0f;
 
                 wasCancelled = false;
                 currentError = NO_ERROR;
@@ -161,13 +146,12 @@ void FuelPumpSystem::update() {
         case ERROR:
             pump.stop();
 
-            // reset system after fault
             if(input.startPressed()) {
                 flowSensor.reset();
 
                 fuelAmount = 0.0f;
                 selectedPrice = 0.0f;
-                totalCost = 0.0;
+                totalCost = 0.0f;
 
                 wasCancelled = false;
                 currentError = NO_ERROR;
@@ -179,9 +163,8 @@ void FuelPumpSystem::update() {
     }
 }
 
-// execute one-time logic when entering a new state
+// Handle one-time display updates when entering a new state
 void FuelPumpSystem::handleStateEntry() {
-    // state has changed
     if(state != prevState) {
         switch(state) {
             case READY:
@@ -211,7 +194,6 @@ void FuelPumpSystem::handleStateEntry() {
                 break;
         }
 
-        // update previous state tracker
         prevState = state;
     }
 }

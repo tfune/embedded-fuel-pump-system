@@ -1,10 +1,11 @@
 #pragma once
+
 #include "InputHandler.h"
 #include "Display.h"
 #include "FlowSensor.h"
 #include "PumpDriver.h"
 
-// fuel pump system states
+// Fuel pump system operating states
 enum State {
     READY,
     FUEL_SELECTION,
@@ -13,42 +14,49 @@ enum State {
     ERROR
 };
 
-// error types
+// System fault classifications
 enum ErrorType {
     NO_ERROR,
     TIMEOUT_ERROR,
     FLOW_ERROR
 };
 
-// main application state machine
+// Main application controller and state machine
 class FuelPumpSystem {
 public:
-    // initialize system hardware and variables
+    // Initializes system hardware, drivers, and transaction state
     void init();
 
-    // execute one cycle of the system state machine
+    // Executes one cycle of the system state machine
     void update();
 
 private:
-    // state machine tracking tracking
+    // Handles one-time actions when entering a new state
+    void handleStateEntry();
+
+    // State machine tracking
     State state;
     State prevState;
 
-    // handle one-time state entry actions
-    void handleStateEntry();
+    // Hardware interface modules
+    InputHandler input;
+    Display display;
+    FlowSensor flowSensor;
+    PumpDriver pump;
 
-    // system modules
-    InputHandler input; // handles all keypad input
-    Display display;    // handles OLED output
-    FlowSensor flowSensor; // handles flow sensor
-    PumpDriver pump; // controls diaphragm pump
-
-    // timing
+    // Display update timing
     unsigned long lastUpdateTime;
+
+    // Pump runtime timeout protection
     unsigned long pumpStartTime = 0;
     const unsigned long MAX_PUMP_TIME = 30000;
 
-    // fuel transaction data
+    // Flow fault detection timing
+    unsigned long lastFlowCheckTime = 0;
+    unsigned long previousPulseCount = 0;
+    const unsigned long FLOW_CHECK_INTERVAL = 1000;
+
+    // Fuel transaction data
     float fuelAmount = 0.0f;
     float regPrice = 0.0f;
     float premPrice = 0.0f;
@@ -56,21 +64,13 @@ private:
     float selectedPrice = 0.0f;
     float totalCost = 0.0f;
 
-    // true if transaction exited before completion
+    // Transaction status
     bool wasCancelled;
 
-    // MOSFET gate control pin
-    const int pumpControlPin = 47;
-
-    // interrupt-capable flow sensor pin
-    const int flowSensorPin = 2;
-
-    // flow fault detection variables
-    const unsigned long FLOW_CHECK_INTERVAL = 1000;
-
-    unsigned long lastFlowCheckTime = 0;
-    unsigned long previousPulseCount = 0;
-
-    // tracks current error
+    // Current system fault
     ErrorType currentError = NO_ERROR;
+
+    // Hardware pin assignments
+    const int pumpControlPin = 47;
+    const int flowSensorPin = 2;
 };

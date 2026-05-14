@@ -1,14 +1,15 @@
 #pragma once
+
 #include <Arduino.h>
 #include <Adafruit_SSD1306.h>
 
 // Handles all OLED screen rendering for fuel pump system
 class Display {
 public:
-    // initialize OLED display
+    // Initializes OLED display hardware
     void init();
 
-    // state screens
+    // Displays the main system state screens
     void showReadyScreen();
     void showFuelSelectionScreen();
     void showPumpingScreen(float fuel, float cost);
@@ -16,6 +17,6 @@ public:
     void showErrorScreen(const char* errorMessage);
 
 private:
-    // OLED display object
+    // OLED display driver instance
     Adafruit_SSD1306 oled;
 };

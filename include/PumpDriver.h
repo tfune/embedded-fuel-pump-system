@@ -1,15 +1,25 @@
 #pragma once
 #include <Arduino.h>
 
+// Controls MOSFET-based pump operation
 class PumpDriver {
 public:
-    void init(uint8_t pin); // configures hardware
-    void start(); // turns pump on
-    void stop(); // turns pump off (safely)
+    // Initializes pump control hardware
+    void init(uint8_t pin);
 
-    bool isRunning(); // queries pump state
+    // Enables pump output
+    void start();
+
+    // Disables pump output
+    void stop();
+
+    // Returns current pump operating state
+    bool isRunning();
 
 private:
+    // MOSFET control output pin
     uint8_t controlPin;
+
+    // Current pump operating state
     bool running = false;
 };
