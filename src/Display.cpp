@@ -102,14 +102,14 @@ void Display::showPumpingScreen(float fuel, float cost) {
  }
 
  // error state screen
- void Display::showErrorScreen() {
+ void Display::showErrorScreen(const char* errorMessage) {
     oled.clearDisplay();
 
     oled.setCursor(0, 0);
     oled.println("SYSTEM ERROR");
 
     oled.setCursor(0, 16);
-    oled.println("Pump Timeout");
+    oled.println(errorMessage);
 
     oled.setCursor(0, 48);
     oled.print("Press A to Reset");

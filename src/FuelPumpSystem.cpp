@@ -78,6 +78,10 @@ void FuelPumpSystem::update() {
                 // start timeout timer when pump first activates
                 if(!pump.isRunning()) {
                     pumpStartTime = millis();
+
+                    // initialize flow fault tracking
+                    previousPulseCount = flowSensor.getPulseCount();
+                    lastFlowCheckTime = millis();
                 }
 
                 pump.start();
@@ -90,8 +94,28 @@ void FuelPumpSystem::update() {
                 millis() - pumpStartTime >= MAX_PUMP_TIME)
             {
                 pump.stop();
+                currentError = TIMEOUT_ERROR;
                 state = ERROR;
                 break;
+            }
+
+            // detect pump running without flow pulses
+            if(pump.isRunning() &&
+                millis() - lastFlowCheckTime >= FLOW_CHECK_INTERVAL)
+            {
+                lastFlowCheckTime = millis();
+                unsigned long currentPulseCount = flowSensor.getPulseCount();
+
+                // enter error state if no new pulses
+                if(currentPulseCount == previousPulseCount) {
+                    pump.stop();
+                    currentError = FLOW_ERROR;
+                    state = ERROR;
+                    break;
+                }
+
+                // update previous pulse snapshot
+                previousPulseCount = currentPulseCount;
             }
 
             // get fuel amount from flow sensor
@@ -128,6 +152,7 @@ void FuelPumpSystem::update() {
                 totalCost = 0.0;
 
                 wasCancelled = false;
+                currentError = NO_ERROR;
 
                 state = READY;
             }
@@ -136,7 +161,17 @@ void FuelPumpSystem::update() {
         case ERROR:
             pump.stop();
 
+            // reset system after fault
             if(input.startPressed()) {
+                flowSensor.reset();
+
+                fuelAmount = 0.0f;
+                selectedPrice = 0.0f;
+                totalCost = 0.0;
+
+                wasCancelled = false;
+                currentError = NO_ERROR;
+
                 state = READY;
             }
 
@@ -166,7 +201,13 @@ void FuelPumpSystem::handleStateEntry() {
                 break;
 
             case ERROR:
-                display.showErrorScreen();
+                if(currentError == TIMEOUT_ERROR) {
+                    display.showErrorScreen("Pump Timeout");
+                } else if(currentError == FLOW_ERROR) {
+                    display.showErrorScreen("No Flow Detected");
+                } else {
+                    display.showErrorScreen("Unknown Fault");
+                }
                 break;
         }
 

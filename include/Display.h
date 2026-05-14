@@ -13,7 +13,7 @@ public:
     void showFuelSelectionScreen();
     void showPumpingScreen(float fuel, float cost);
     void showCompleteScreen(bool cancelled, float fuel, float price, float total);
-    void showErrorScreen();
+    void showErrorScreen(const char* errorMessage);
 
 private:
     // OLED display object

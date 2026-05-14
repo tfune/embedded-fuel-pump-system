@@ -13,6 +13,13 @@ enum State {
     ERROR
 };
 
+// error types
+enum ErrorType {
+    NO_ERROR,
+    TIMEOUT_ERROR,
+    FLOW_ERROR
+};
+
 // main application state machine
 class FuelPumpSystem {
 public:
@@ -57,4 +64,13 @@ private:
 
     // interrupt-capable flow sensor pin
     const int flowSensorPin = 2;
+
+    // flow fault detection variables
+    const unsigned long FLOW_CHECK_INTERVAL = 1000;
+
+    unsigned long lastFlowCheckTime = 0;
+    unsigned long previousPulseCount = 0;
+
+    // tracks current error
+    ErrorType currentError = NO_ERROR;
 };
