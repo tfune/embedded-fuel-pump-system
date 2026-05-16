@@ -48,5 +48,5 @@ bool InputHandler::fuel3Pressed() { return fuel3Event; }
 
 // Return current pump trigger state
 bool InputHandler::pumpHeld() {
-    return pumpState; // returns true when trigger button is held
+    return pumpState;
 }
